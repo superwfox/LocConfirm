@@ -1,0 +1,4 @@
+name: LocConfirm
+version: '8'
+main: sudark2.Sudark.locConfirm.LocConfirm
+api-version: '1.21'
