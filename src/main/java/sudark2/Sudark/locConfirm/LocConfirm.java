@@ -45,25 +45,28 @@ public final class LocConfirm extends JavaPlugin {
                     + " §f, §e" + (tarLoc.getBlockY() - CL.getBlockY())
                     + " §f, §e" + (CL.getBlockZ() - tarLoc.getBlockZ()));
         }
-    }
 
-    @EventHandler
-    public void onPlayerDropItem(BlockBreakEvent event) {
-        Player pl = event.getPlayer();
-        Location loc = event.getBlock().getLocation();
-        ItemStack itemInHand = pl.getItemInHand();
 
-        if (itemInHand != null && itemInHand.getType() == Material.AIR) {
-            if (struct.size() > 1) {
-                transform(struct.getFirst(), loc);
-                return;
+        @EventHandler
+        public void onPlayerDropItem(BlockBreakEvent event) {
+            Player pl = event.getPlayer();
+            Location loc = event.getBlock().getLocation();
+            ItemStack itemInHand = pl.getItemInHand();
+            System.out.println(pl.getName() + "拿着 " + itemInHand.getType().name() + "破坏了" + event.getBlock().getType());
+
+            if (itemInHand.getType() == Material.AIR) {
+                if (struct.size() == 1) {
+                    transform(struct.getFirst(), loc);
+                    struct.clear();
+                    return;
+                }
+                struct.add(loc);
             }
-            struct.add(loc);
         }
     }
 
     public void transform(Location locA, Location locB) {
-        struct.clear();
+        System.out.println(locA+"\n\n"+locB);
         Location maxLoc, minLoc;
         World world = locA.getWorld();
         if (locA.getBlockX() > locB.getBlockX()) {
@@ -73,6 +76,9 @@ public final class LocConfirm extends JavaPlugin {
             maxLoc = locB;
             minLoc = locA;
         }
+        int minX = minLoc.getBlockX();
+        int minY = minLoc.getBlockY();
+        int minZ = minLoc.getBlockZ();
 
         StringBuilder sb = new StringBuilder();
 
@@ -130,7 +136,12 @@ public final class LocConfirm extends JavaPlugin {
                         canExpand = false;
                     }
 
-                    sb.append("new Effect(Material." + type.name() + ",HalfP(LocHP( tx" + x + ",ty" + y + ",tz" + z + ")," + dx + ", " + dy + ", " + dz + ")), ");
+                    sb.append("new Effect(Material." + type.name() +
+                            ",HalfP(LocHP( tx =" + (x - minX) +
+                            ",ty = " + (y - minY) +
+                            ",tz = " + (z - minZ) +
+                            "),"
+                            + dx + ", " + dy + ", " + dz + ")),\n");
 
                     // ====== 确认完整长方体并清空 ======
                     for (int xx = x; xx < x + dx; xx++)
@@ -139,6 +150,6 @@ public final class LocConfirm extends JavaPlugin {
                                 world.getBlockAt(xx, yy, zz).setType(Material.AIR);
                 }
         sb.append("};");
-        System.out.println(sb);
+        System.out.println("\n" + sb);
     }
 }
